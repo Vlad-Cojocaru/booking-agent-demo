@@ -107,13 +107,35 @@ export const useVapi = (): VapiHook => {
 
     try {
       setState(prev => ({ ...prev, isConnecting: true, error: null }));
+      
+      console.log('Starting call with config:', { 
+        publicKey: config.publicKey.substring(0, 10) + '...', 
+        assistantId: config.assistantId 
+      });
+
+      // Test API key with a simple request
+      try {
+        const testResponse = await fetch('https://api.vapi.ai/assistant', {
+          headers: {
+            'Authorization': `Bearer ${config.publicKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('API key test response:', testResponse.status, testResponse.statusText);
+      } catch (testError) {
+        console.error('API key test failed:', testError);
+      }
 
       // Initialize Vapi instance
       if (!vapiRef.current) {
+        console.log('Creating new Vapi instance...');
+        console.log('API Key length:', config.publicKey.length);
+        console.log('API Key starts with:', config.publicKey.substring(0, 10));
         vapiRef.current = new Vapi(config.publicKey);
 
         // Set up event listeners
         vapiRef.current.on('call-start', () => {
+          console.log('Call started successfully');
           setState(prev => ({ 
             ...prev, 
             isConnected: true, 
@@ -172,6 +194,7 @@ export const useVapi = (): VapiHook => {
         });
 
         vapiRef.current.on('error', (error) => {
+          console.error('Vapi error event:', error);
           setState(prev => ({ 
             ...prev, 
             error: error.message || 'An error occurred',
@@ -181,9 +204,12 @@ export const useVapi = (): VapiHook => {
       }
 
       // Start the call
+      console.log('Starting Vapi call...');
       await vapiRef.current.start(config.assistantId);
+      console.log('Vapi call started successfully');
       
     } catch (error) {
+      console.error('Vapi call failed:', error);
       setState(prev => ({ 
         ...prev, 
         error: error instanceof Error ? error.message : 'Failed to start call',
