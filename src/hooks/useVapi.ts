@@ -113,19 +113,6 @@ export const useVapi = (): VapiHook => {
         assistantId: config.assistantId 
       });
 
-      // Test API key with a simple request
-      try {
-        const testResponse = await fetch('https://api.vapi.ai/assistant', {
-          headers: {
-            'Authorization': `Bearer ${config.publicKey}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log('API key test response:', testResponse.status, testResponse.statusText);
-      } catch (testError) {
-        console.error('API key test failed:', testError);
-      }
-
       // Initialize Vapi instance
       if (!vapiRef.current) {
         console.log('Creating new Vapi instance...');
