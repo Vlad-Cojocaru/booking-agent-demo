@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElevenLabs Orb Test</title>
+    <style>
+        body {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .orb-container {
+            width: 300px;
+            height: 300px;
+            position: relative;
+        }
+        #orb {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="orb-container">
+        <elevenlabs-convai agent-id="agent_9801k34h6cgtey4tkvwxdccnd630" id="orb"></elevenlabs-convai>
+    </div>
+    
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+    
+    <script>
+        // Wait for the orb to load and then inspect it
+        setTimeout(() => {
+            const orb = document.getElementById('orb');
+            console.log('Orb element:', orb);
+            
+            // Try to find the actual orb assets
+            const orbShadow = orb.shadowRoot;
+            if (orbShadow) {
+                console.log('Shadow DOM found:', orbShadow);
+                const styles = orbShadow.querySelectorAll('style');
+                const images = orbShadow.querySelectorAll('img');
+                const svgs = orbShadow.querySelectorAll('svg');
+                
+                console.log('Styles found:', styles.length);
+                console.log('Images found:', images.length);
+                console.log('SVGs found:', svgs.length);
+                
+                styles.forEach((style, index) => {
+                    console.log(`Style ${index}:`, style.textContent);
+                });
+                
+                images.forEach((img, index) => {
+                    console.log(`Image ${index}:`, img.src);
+                });
+                
+                svgs.forEach((svg, index) => {
+                    console.log(`SVG ${index}:`, svg.outerHTML);
+                });
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
