@@ -124,23 +124,41 @@ export const useVapi = (): VapiHook => {
         });
 
         vapiRef.current.on('call-end', () => {
-          setState(prev => ({ 
-            ...prev, 
-            isConnected: false, 
-            isSpeaking: false, 
-            isListening: false,
-            audioLevel: 0
-          }));
           // Cleanup audio monitoring
           if (animationFrameRef.current) {
             cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
           }
+          
+          // Cleanup audio context and stream
+          if (microphoneRef.current) {
+            microphoneRef.current.disconnect();
+            microphoneRef.current = null;
+          }
+          if (audioContextRef.current) {
+            audioContextRef.current.close();
+            audioContextRef.current = null;
+          }
+          if (analyserRef.current) {
+            analyserRef.current = null;
+          }
+          
+          // Ensure all states are reset
+          setState(prev => ({ 
+            ...prev, 
+            isConnected: false, 
+            isConnecting: false,
+            isSpeaking: false, 
+            isListening: false,
+            isMuted: false,
+            audioLevel: 0
+          }));
         });
 
         vapiRef.current.on('speech-start', () => {
           setState(prev => ({ 
             ...prev, 
-            isSpeaking: true, 
+            isSpeaking: prev.isConnected, // Only set speaking if still connected
             isListening: false 
           }));
         });
@@ -149,12 +167,16 @@ export const useVapi = (): VapiHook => {
           setState(prev => ({ 
             ...prev, 
             isSpeaking: false, 
-            isListening: true 
+            isListening: prev.isConnected // Only set listening if still connected
           }));
         });
 
         vapiRef.current.on('error', (error) => {
-          setState(prev => ({ ...prev, error: error.message || 'An error occurred' }));
+          setState(prev => ({ 
+            ...prev, 
+            error: error.message || 'An error occurred',
+            isConnecting: false 
+          }));
         });
       }
 
@@ -173,13 +195,29 @@ export const useVapi = (): VapiHook => {
   const endCall = useCallback(() => {
     if (vapiRef.current) {
       vapiRef.current.stop();
+      vapiRef.current = null; // Clear the reference to ensure clean state
     }
     
     // Cleanup audio monitoring
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
     
+    // Cleanup audio context and stream
+    if (microphoneRef.current) {
+      microphoneRef.current.disconnect();
+      microphoneRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    if (analyserRef.current) {
+      analyserRef.current = null;
+    }
+    
+    // Force reset all states immediately
     setState({
       isConnected: false,
       isConnecting: false,
@@ -198,6 +236,10 @@ export const useVapi = (): VapiHook => {
     setState(prev => ({ ...prev, isMuted: !prev.isMuted }));
   }, [state.isMuted]);
 
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
+
   useEffect(() => {
     return () => {
       if (vapiRef.current) {
@@ -214,6 +256,7 @@ export const useVapi = (): VapiHook => {
     startCall,
     endCall,
     toggleMute,
-    setConfig
+    setConfig,
+    clearError
   };
 };

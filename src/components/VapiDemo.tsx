@@ -26,7 +26,8 @@ export const VapiDemo = () => {
     startCall,
     endCall,
     toggleMute,
-    setConfig
+    setConfig,
+    clearError
   } = useVapi();
 
   const handleSaveConfig = () => {
@@ -36,6 +37,7 @@ export const VapiDemo = () => {
     }
     
     setConfig({ publicKey: publicKey.trim(), assistantId: assistantId.trim() });
+    clearError(); // Clear any existing error when new config is saved
     setShowConfig(false);
     toast.success("Vapi configuration saved!");
   };
@@ -191,6 +193,7 @@ export const VapiDemo = () => {
               isConnected={isConnected}
               isMuted={isMuted}
               isConnecting={isConnecting}
+              error={error}
               onCall={handleCall}
               onHangup={handleHangup}
               onToggleMute={toggleMute}

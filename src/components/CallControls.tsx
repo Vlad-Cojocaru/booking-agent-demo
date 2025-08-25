@@ -6,6 +6,7 @@ interface CallControlsProps {
   isConnected: boolean;
   isMuted: boolean;
   isConnecting: boolean;
+  error: string | null;
   onCall: () => void;
   onHangup: () => void;
   onToggleMute: () => void;
@@ -15,6 +16,7 @@ export const CallControls = ({
   isConnected,
   isMuted,
   isConnecting,
+  error,
   onCall,
   onHangup,
   onToggleMute
@@ -25,7 +27,7 @@ export const CallControls = ({
       {!isConnected ? (
         <Button
           onClick={onCall}
-          disabled={isConnecting}
+          disabled={isConnecting || !!error}
           size="lg"
           className={cn(
             "h-16 w-16 rounded-full transition-all duration-300",
